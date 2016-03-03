@@ -380,7 +380,10 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
             x = px * fact
             y = py * fact
 
-        bpy.ops.mesh.primitive_plane_add('INVOKE_REGION_WIN')
+        view_align = False
+        if context.user_preferences.edit.object_align == 'VIEW':
+            view_align = True
+        bpy.ops.mesh.primitive_plane_add({'view_align': view_align}, 'INVOKE_REGION_WIN')
         plane = context.scene.objects.active
         # Why does mesh.primitive_plane_add leave the object in edit mode???
         if plane.mode is not 'OBJECT':
