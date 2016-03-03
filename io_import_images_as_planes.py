@@ -380,7 +380,20 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
             x = px * fact
             y = py * fact
 
-        bpy.ops.mesh.primitive_plane_add('INVOKE_REGION_WIN')
+        # If this is invoked from outside 3D View (for example, from File > Import) then we need to tell
+        # mesh.primitive_plane_add the area it should use as reference for adding planes, or else
+        # mesh.primitive_plane_add won't respect the user setting 'Editing > Align To' and will always add planes aligned to top view 
+        override = None
+        for area in context.screen.areas:
+            if area.type == 'VIEW_3D':
+                override = {'window': context.window, 'screen': context.screen, 'area': area}
+                break
+
+        if override is not None:
+            bpy.ops.mesh.primitive_plane_add(override)
+        else:
+            # If the current screen has no 3D View window then we just use the default behaviour
+            bpy.ops.mesh.primitive_plane_add('INVOKE_REGION_WIN')
         plane = context.scene.objects.active
         # Why does mesh.primitive_plane_add leave the object in edit mode???
         if plane.mode is not 'OBJECT':
